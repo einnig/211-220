@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markorð: 211 - 220 algengustu orðin.</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f0f4f8; margin: 0; padding: 2vh 5vw; min-height: 95vh; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .container { width: 100%; max-width: 1200px; background: white; padding: 30px 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-height: 100%; overflow-y: auto; }
+        h1 { color: #1a73e8; font-size: 2em; margin-top: 0; margin-bottom: 15px; }
+        .progress-container { width: 100%; background-color: #e0e0e0; border-radius: 10px; margin-bottom: 20px; height: 20px; }
+        #progress-bar { height: 100%; width: 0%; background-color: #34a853; border-radius: 10px; transition: width 0.5s ease-in-out; }
+        #counter { font-size: 1.2em; color: #666; font-weight: bold; margin-bottom: 10px; }
+        .lang-selector { margin-bottom: 20px; background: #fff3e0; padding: 10px 15px; border-radius: 10px; display: inline-block; border: 1px solid #ffcc80; }
+        .lang-selector select { padding: 8px; font-size: 1.1em; border-radius: 5px; border: 1px solid #ccc; cursor: pointer; margin-left: 10px; max-width: 300px; }
+        #target { font-size: 4em; margin: 10px 0; color: #222; font-weight: bold; }
+        #is-explanation { font-size: 1.1em; color: #333; background-color: #e8f0fe; padding: 15px 25px; border-radius: 10px; display: inline-block; margin-bottom: 20px; max-width: 85%; line-height: 1.6; text-align: left; }
+        #is-explanation p { margin: 6px 0; }
+        .btn { padding: 12px 25px; font-size: 1.2em; margin: 5px; cursor: pointer; border: none; border-radius: 8px; background-color: #1a73e8; color: white; transition: 0.3s; font-weight: bold; }
+        .btn:hover:not(:disabled) { background-color: #1557b0; transform: scale(1.02); }
+        .recording { background-color: #d93025; animation: pulse 1.5s infinite; }
+        .recording:hover { background-color: #b3140b; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #media-box { font-size: 1.1em; color: #444; text-align: left; background: #f8fbff; padding: 15px 30px; border-radius: 12px; line-height: 1.6; border-left: 6px solid #1a73e8; margin-top: 15px; display: inline-block; min-width: 85%; }
+        #media-box p { margin: 6px 0; }
+        #spoken { margin-top: 15px; font-size: 1.4em; font-style: italic; color: #555; }
+        #result { font-weight: bold; font-size: 1.8em; margin-top: 5px; color: #1a73e8; }
+        .nav-btns { margin-top: 20px; }
+        #studentName { font-size: 1.5em; padding: 10px; margin: 20px 0; width: 80%; max-width: 400px; border: 2px solid #1a73e8; border-radius: 8px; text-align: center; }
+        .feedback-note { margin-top: 40px; font-size: 0.95em; color: #555; padding-top: 15px; border-top: 1px solid #ddd; }
+        .feedback-note a { color: #1a73e8; text-decoration: none; font-weight: bold; }
+        .feedback-note a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <div id="exercise-view">
+        <h1>Markorð: 211 - 220 algengustu orðin.</h1>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div class="lang-selector">
+            <label for="languageSelect"><b>🌍 Veldu tungumál:</b></label>
+            <select id="languageSelect" onchange="updateUI()">
+                <option value="none" selected disabled>-- Veldu tungumál --</option>
+                <option value="ar">Arabíska – العربية</option>
+                <option value="da">Danska – Dansk</option>
+                <option value="en">Enska – English</option>
+                <option value="tl">Filippseyska – Tagalog</option>
+                <option value="no">Norska – Norsk</option>
+                <option value="fa">Persneska – فارسی</option>
+                <option value="pl">Pólska – Polski</option>
+                <option value="ru">Rússneska – Русский</option>
+                <option value="es">Spænska – Español</option>
+                <option value="sv">Sænska – Svenska</option>
+                <option value="th">Tælenska – ภาษาไทย</option>
+                <option value="uk">Úkraínska – Українська</option>
+                <option value="vi">Víetnamska – Tiếng Việt</option>
+            </select>
+        </div>
+        <div id="counter"></div>
+        <div id="target"></div>
+        <div id="is-explanation"></div>
+        <br>
+        <button id="record-btn" class="btn" onclick="toggleRecord()">🎤 Tala</button>
+        <div id="spoken"></div>
+        <div id="result"></div>
+        <div id="media-box"></div>
+        <div class="nav-btns">
+            <button class="btn" style="background-color: #5f6368;" onclick="prevExercise()">⬅️ Fyrri</button>
+            <button class="btn" style="background-color: #5f6368;" onclick="nextExercise()">Næsta ➡️</button>
+        </div>
+        <div class="feedback-note">Vinsamlegast sendið ábendingar á <a href="mailto:dgu@fb.is">dgu@fb.is</a></div>
+    </div>
+    <div id="completion-view" style="display: none;"></div>
+</div>
+
+<script>
+const exerciseData = [
+    { 
+        text: "átti", 
+        is_exp: "<p><b>Orðflokkur:</b> Sagnorð (þátíð af eiga)</p><p><b>Útskýring 1:</b> Að eiga hlut (í þátíð).</p><p><b>Dæmi 1:</b> Ég <b>átti</b> þennan bíl.</p><p><b>Útskýring 2:</b> Að þurfa að gera eitthvað (í þátíð).</p><p><b>Dæmi 2:</b> Ég <b>átti</b> að læra heima.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> فعل</p><p><b>الشرح 1:</b> امتلاك شيء ما (في الماضي).</p><p><b>المثال 1:</b> لقد <b>امتلكت</b> هذه السيارة.</p><p><b>الشرح 2:</b> أن تكون مطالباً بفعل شيء (في الماضي).</p><p><b>المثال 2:</b> <b>كان يجب عليّ</b> أن أدرس في المنزل.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Udsagnsord</p><p><b>Forklaring 1:</b> At eje en ting (i datid).</p><p><b>Eksempel 1:</b> Jeg <b>ejede</b> denne bil.</p><p><b>Forklaring 2:</b> At skulle gøre noget (i datid).</p><p><b>Eksempel 2:</b> Jeg <b>skulle</b> læse lektier derhjemme.</p>",
+            "en": "<p><b>Word class:</b> Verb</p><p><b>Explanation 1:</b> To own a thing (in the past).</p><p><b>Example 1:</b> I <b>owned</b> this car.</p><p><b>Explanation 2:</b> To have to do something (in the past).</p><p><b>Example 2:</b> I <b>was supposed</b> to study at home.</p>",
+            "tl": "<p><b>Bahagi:</b> Pandiwa</p><p><b>Paliwanag 1:</b> Pagmamay-ari ng isang bagay (sa nakaraan).</p><p><b>Halimbawa 1:</b> <b>Pag-aari ko</b> ang kotseng ito.</p><p><b>Paliwanag 2:</b> Kailangang gawin ang isang bagay (sa nakaraan).</p><p><b>Halimbawa 2:</b> <b>Dapat sana</b> akong mag-aral sa bahay.</p>",
+            "no": "<p><b>Ordklasse:</b> Verb</p><p><b>Forklaring 1:</b> Å eie en ting (i fortid).</p><p><b>Eksempel 1:</b> Jeg <b>eide</b> denne bilen.</p><p><b>Forklaring 2:</b> Å skulle gjøre noe (i fortid).</p><p><b>Eksempel 2:</b> Jeg <b>skulle</b> gjøre lekser hjemme.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> فعل</p><p><b>توضیح 1:</b> مالک چیزی بودن (در گذشته).</p><p><b>مثال 1:</b> من این ماشین را <b>داشتم</b>.</p><p><b>توضیح 2:</b> مجبور بودن به انجام کاری (در گذشته).</p><p><b>مثال 2:</b> من <b>قرار بود</b> در خانه درس بخوانم.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Czasownik</p><p><b>Wyjaśnienie 1:</b> Posiadać rzecz (w czasie przeszłym).</p><p><b>Przykład 1:</b> <b>Miałem</b> ten samochód.</p><p><b>Wyjaśnienie 2:</b> Mieć coś do zrobienia (w czasie przeszłym).</p><p><b>Przykład 2:</b> <b>Miałem</b> uczyć się w domu.</p>",
+            "ru": "<p><b>Часть речи:</b> Глагол</p><p><b>Объяснение 1:</b> Владеть вещью (в прошлом).</p><p><b>Пример 1:</b> Я <b>владел</b> этой машиной.</p><p><b>Объяснение 2:</b> Быть обязанным что-то сделать (в прошлом).</p><p><b>Пример 2:</b> Я <b>должен был</b> учиться дома.</p>",
+            "es": "<p><b>Clase de palabra:</b> Verbo</p><p><b>Explicación 1:</b> Poseer una cosa (en el pasado).</p><p><b>Ejemplo 1:</b> Yo <b>tenía</b> este coche.</p><p><b>Explicación 2:</b> Tener que hacer algo (en el pasado).</p><p><b>Ejemplo 2:</b> Yo <b>debía</b> estudiar en casa.</p>",
+            "sv": "<p><b>Ordklass:</b> Verb</p><p><b>Förklaring 1:</b> Att äga en sak (i dåtid).</p><p><b>Exempel 1:</b> Jag <b>ägde</b> den här bilen.</p><p><b>Förklaring 2:</b> Att behöva göra något (i dåtid).</p><p><b>Exempel 2:</b> Jag <b>skulle</b> plugga hemma.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> คำกริยา</p><p><b>คำอธิบาย 1:</b> เป็นเจ้าของสิ่งของ (ในอดีต)</p><p><b>ตัวอย่าง 1:</b> ฉันเคย<b>เป็นเจ้าของ</b>รถคันนี้</p><p><b>คำอธิบาย 2:</b> จำเป็นต้องทำบางสิ่ง (ในอดีต)</p><p><b>ตัวอย่าง 2:</b> ฉัน<b>ควรจะ</b>เรียนที่บ้าน</p>",
+            "uk": "<p><b>Частина мови:</b> Дієслово</p><p><b>Пояснення 1:</b> Володіти річчю (в минулому).</p><p><b>Приклад 1:</b> Я <b>мав</b> цю машину.</p><p><b>Пояснення 2:</b> Мати щось зробити (в минулому).</p><p><b>Приклад 2:</b> Я <b>повинен був</b> вчитися вдома.</p>",
+            "vi": "<p><b>Loại từ:</b> Động từ</p><p><b>Giải thích 1:</b> Sở hữu một thứ gì đó (trong quá khứ).</p><p><b>Ví dụ 1:</b> Tôi <b>đã sở hữu</b> chiếc xe này.</p><p><b>Giải thích 2:</b> Phải làm một việc gì đó (trong quá khứ).</p><p><b>Ví dụ 2:</b> Đáng lẽ ra tôi <b>phải</b> học ở nhà.</p>"
+        }
+    },
+    { 
+        text: "svona", 
+        is_exp: "<p><b>Orðflokkur:</b> Atviksorð</p><p><b>Útskýring 1:</b> Á þennan hátt eða eins og þetta.</p><p><b>Dæmi 1:</b> Þú gerir þetta <b>svona</b>.</p><p><b>Útskýring 2:</b> Þegar eitthvað er mjög mikið (til dæmis mjög stórt eða mjög seinn).</p><p><b>Dæmi 2:</b> Af hverju ertu <b>svona</b> seinn?</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> ظرف</p><p><b>الشرح 1:</b> بهذه الطريقة أو مثل هذا.</p><p><b>المثال 1:</b> أنت تفعل ذلك <b>هكذا</b>.</p><p><b>الشرح 2:</b> عندما يكون هناك شيء ما كثيراً جداً.</p><p><b>المثال 2:</b> لماذا تأخرت <b>إلى هذا الحد</b>؟</p></div>",
+            "da": "<p><b>Ordklasse:</b> Biord</p><p><b>Forklaring 1:</b> På denne måde eller sådan her.</p><p><b>Eksempel 1:</b> Du gør det <b>sådan her</b>.</p><p><b>Forklaring 2:</b> Når noget er meget (f.eks. meget sen).</p><p><b>Eksempel 2:</b> Hvorfor er du <b>så</b> sen?</p>",
+            "en": "<p><b>Word class:</b> Adverb</p><p><b>Explanation 1:</b> In this way or like this.</p><p><b>Example 1:</b> You do it <b>like this</b>.</p><p><b>Explanation 2:</b> When something is very much (so / very).</p><p><b>Example 2:</b> Why are you <b>so</b> late?</p>",
+            "tl": "<p><b>Bahagi:</b> Pang-abay</p><p><b>Paliwanag 1:</b> Sa ganitong paraan o tulad nito.</p><p><b>Halimbawa 1:</b> Ginagawa mo ito nang <b>ganito</b>.</p><p><b>Paliwanag 2:</b> Kapag ang isang bagay ay napakarami.</p><p><b>Halimbawa 2:</b> Bakit <b>sobra</b> kang huli?</p>",
+            "no": "<p><b>Ordklasse:</b> Adverb</p><p><b>Forklaring 1:</b> På denne måten eller slik som dette.</p><p><b>Eksempel 1:</b> Du gjør det <b>slik</b>.</p><p><b>Forklaring 2:</b> Når noe er svært mye.</p><p><b>Eksempel 2:</b> Hvorfor er du <b>så</b> sen?</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> قید</p><p><b>توضیح 1:</b> به این روش یا این‌طور.</p><p><b>مثال 1:</b> تو این کار را <b>این‌طور</b> انجام می‌دهی.</p><p><b>توضیح 2:</b> برای نشان دادن مقدار زیاد (این‌قدر).</p><p><b>مثال 2:</b> چرا <b>این‌قدر</b> دیر کردی؟</p></div>",
+            "pl": "<p><b>Część mowy:</b> Przysłówek</p><p><b>Wyjaśnienie 1:</b> W ten sposób lub jak to.</p><p><b>Przykład 1:</b> Robisz to <b>w ten sposób (tak)</b>.</p><p><b>Wyjaśnienie 2:</b> Gdy czegoś jest bardzo dużo (tak bardzo).</p><p><b>Przykład 2:</b> Dlaczego jesteś <b>tak</b> spóźniony?</p>",
+            "ru": "<p><b>Часть речи:</b> Наречие</p><p><b>Объяснение 1:</b> Таким образом или вот так.</p><p><b>Пример 1:</b> Ты делаешь это <b>вот так</b>.</p><p><b>Объяснение 2:</b> Когда чего-то очень много (так / настолько).</p><p><b>Пример 2:</b> Почему ты <b>так</b> опоздал?</p>",
+            "es": "<p><b>Clase de palabra:</b> Adverbio</p><p><b>Explicación 1:</b> De esta manera o así.</p><p><b>Ejemplo 1:</b> Lo haces <b>así</b>.</p><p><b>Explicación 2:</b> Cuando algo es mucho (tan / muy).</p><p><b>Ejemplo 2:</b> ¿Por qué llegas <b>tan</b> tarde?</p>",
+            "sv": "<p><b>Ordklass:</b> Adverb</p><p><b>Förklaring 1:</b> På det här sättet eller så här.</p><p><b>Exempel 1:</b> Du gör det <b>så här</b>.</p><p><b>Förklaring 2:</b> När något är väldigt mycket (så).</p><p><b>Exempel 2:</b> Varför är du <b>så</b> sen?</p>",
+            "th": "<p><b>ชนิดของคำ:</b> กริยาวิเศษณ์</p><p><b>คำอธิบาย 1:</b> ในวิธีนี้ หรือแบบนี้</p><p><b>ตัวอย่าง 1:</b> คุณทำมัน<b>แบบนี้</b></p><p><b>คำอธิบาย 2:</b> เมื่อบางสิ่งมีมาก (มาก / ขนาดนี้)</p><p><b>ตัวอย่าง 2:</b> ทำไมคุณมาสาย<b>ขนาดนี้</b>?</p>",
+            "uk": "<p><b>Частина мови:</b> Прислівник</p><p><b>Пояснення 1:</b> Таким чином або ось так.</p><p><b>Приклад 1:</b> Ти робиш це <b>ось так</b>.</p><p><b>Пояснення 2:</b> Коли чогось дуже багато (так / настільки).</p><p><b>Приклад 2:</b> Чому ти <b>так</b> спізнився?</p>",
+            "vi": "<p><b>Loại từ:</b> Trạng từ</p><p><b>Giải thích 1:</b> Theo cách này hoặc như thế này.</p><p><b>Ví dụ 1:</b> Bạn làm điều đó <b>như thế này</b>.</p><p><b>Giải thích 2:</b> Khi có điều gì đó rất nhiều (đến mức/quá).</p><p><b>Ví dụ 2:</b> Tại sao bạn lại đến muộn <b>như vậy</b>?</p>"
+        }
+    },
+    { 
+        text: "miklu", 
+        is_exp: "<p><b>Orðflokkur:</b> Atviksorð / Lýsingarorð</p><p><b>Útskýring 1:</b> Mikið meira en eitthvað annað.</p><p><b>Dæmi 1:</b> Hann er <b>miklu</b> eldri en ég.</p><p><b>Útskýring 2:</b> Að breyta miklu eða skipta stóru máli.</p><p><b>Dæmi 2:</b> Þetta skiptir <b>miklu</b> máli.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> ظرف / صفة</p><p><b>الشرح 1:</b> أكثر بكثير من شيء آخر.</p><p><b>المثال 1:</b> إنه أكبر مني <b>بكثير</b>.</p><p><b>الشرح 2:</b> لإحداث فرق كبير أو أهمية كبيرة.</p><p><b>المثال 2:</b> هذا يهم <b>كثيراً</b>.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Biord / Tillægsord</p><p><b>Forklaring 1:</b> Meget mere end noget andet.</p><p><b>Eksempel 1:</b> Han er <b>meget</b> ældre end mig.</p><p><b>Forklaring 2:</b> At gøre en stor forskel eller betyde meget.</p><p><b>Eksempel 2:</b> Dette betyder <b>meget</b>.</p>",
+            "en": "<p><b>Word class:</b> Adverb / Adjective</p><p><b>Explanation 1:</b> Much more than something else.</p><p><b>Example 1:</b> He is <b>much</b> older than me.</p><p><b>Explanation 2:</b> To make a big difference or matter a lot.</p><p><b>Example 2:</b> This matters a <b>lot</b>.</p>",
+            "tl": "<p><b>Bahagi:</b> Pang-abay / Pang-uri</p><p><b>Paliwanag 1:</b> Higit na mas marami kaysa sa iba.</p><p><b>Halimbawa 1:</b> <b>Mas</b> matanda siya sa akin.</p><p><b>Paliwanag 2:</b> Malaki ang pinagkaiba o mahalaga.</p><p><b>Halimbawa 2:</b> Mahalaga ito nang <b>sobra</b>.</p>",
+            "no": "<p><b>Ordklasse:</b> Adverb / Adjektiv</p><p><b>Forklaring 1:</b> Mye mer enn noe annet.</p><p><b>Eksempel 1:</b> Han er <b>mye</b> eldre enn meg.</p><p><b>Forklaring 2:</b> Å utgjøre en stor forskjell eller bety mye.</p><p><b>Eksempel 2:</b> Dette betyr <b>mye</b>.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> قید / صفت</p><p><b>توضیح 1:</b> بسیار بیشتر از چیزی دیگر.</p><p><b>مثال 1:</b> او <b>خیلی</b> از من بزرگتر است.</p><p><b>توضیح 2:</b> تفاوت بزرگی ایجاد کردن یا اهمیت زیادی داشتن.</p><p><b>مثال 2:</b> این <b>خیلی</b> مهم است.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Przysłówek / Przymiotnik</p><p><b>Wyjaśnienie 1:</b> Znacznie więcej niż coś innego.</p><p><b>Przykład 1:</b> On jest <b>znacznie</b> starszy ode mnie.</p><p><b>Wyjaśnienie 2:</b> Zmieniać wiele lub mieć duże znaczenie.</p><p><b>Przykład 2:</b> To ma <b>wielkie</b> znaczenie.</p>",
+            "ru": "<p><b>Часть речи:</b> Наречие / Прилагательное</p><p><b>Объяснение 1:</b> Намного больше, чем что-то другое.</p><p><b>Пример 1:</b> Он <b>намного</b> старше меня.</p><p><b>Объяснение 2:</b> Иметь большое значение.</p><p><b>Пример 2:</b> Это имеет <b>большое</b> значение.</p>",
+            "es": "<p><b>Clase de palabra:</b> Adverbio / Adjetivo</p><p><b>Explicación 1:</b> Mucho más que otra cosa.</p><p><b>Ejemplo 1:</b> Él es <b>mucho</b> mayor que yo.</p><p><b>Explicación 2:</b> Hacer una gran diferencia o importar mucho.</p><p><b>Ejemplo 2:</b> Esto importa <b>mucho</b>.</p>",
+            "sv": "<p><b>Ordklass:</b> Adverb / Adjektiv</p><p><b>Förklaring 1:</b> Mycket mer än något annat.</p><p><b>Exempel 1:</b> Han är <b>mycket</b> äldre än jag.</p><p><b>Förklaring 2:</b> Att göra en stor skillnad eller betyda mycket.</p><p><b>Exempel 2:</b> Det här betyder <b>mycket</b>.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> กริยาวิเศษณ์ / คำคุณศัพท์</p><p><b>คำอธิบาย 1:</b> มากกว่าสิ่งอื่นมาก</p><p><b>ตัวอย่าง 1:</b> เขาอายุมากกว่าฉัน<b>มาก</b></p><p><b>คำอธิบาย 2:</b> สร้างความแตกต่างอย่างมาก</p><p><b>ตัวอย่าง 2:</b> สิ่งนี้สำคัญ<b>มาก</b></p>",
+            "uk": "<p><b>Частина мови:</b> Прислівник / Прикметник</p><p><b>Пояснення 1:</b> Набагато більше, ніж щось інше.</p><p><b>Приклад 1:</b> Він <b>набагато</b> старший за мене.</p><p><b>Пояснення 2:</b> Мати велике значення.</p><p><b>Приклад 2:</b> Це має <b>велике</b> значення.</p>",
+            "vi": "<p><b>Loại từ:</b> Trạng từ / Tính từ</p><p><b>Giải thích 1:</b> Nhiều hơn nhiều so với thứ khác.</p><p><b>Ví dụ 1:</b> Anh ấy lớn hơn tôi <b>rất nhiều</b>.</p><p><b>Giải thích 2:</b> Tạo ra sự khác biệt lớn hoặc rất quan trọng.</p><p><b>Ví dụ 2:</b> Điều này quan trọng <b>rất nhiều</b>.</p>"
+        }
+    },
+    { 
+        text: "land", 
+        is_exp: "<p><b>Orðflokkur:</b> Nafnorð (hvorugkyn)</p><p><b>Útskýring 1:</b> Staður þar sem fólk býr, til dæmis Ísland eða Spánn.</p><p><b>Dæmi 1:</b> Ísland er fallegt <b>land</b>.</p><p><b>Útskýring 2:</b> Jörð til að standa á (ekki sjór eða vatn).</p><p><b>Dæmi 2:</b> Við komum loksins í <b>land</b>.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> اسم</p><p><b>الشرح 1:</b> مكان يعيش فيه الناس (مثل آيسلندا).</p><p><b>المثال 1:</b> آيسلندا <b>بلد</b> جميل.</p><p><b>الشرح 2:</b> الأرض للوقوف عليها.</p><p><b>المثال 2:</b> وصلنا أخيراً إلى <b>اليابسة</b>.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Navneord</p><p><b>Forklaring 1:</b> Et sted, hvor folk bor.</p><p><b>Eksempel 1:</b> Island er et smukt <b>land</b>.</p><p><b>Forklaring 2:</b> Jord at stå på (ikke hav).</p><p><b>Eksempel 2:</b> Vi kom endelig i <b>land</b>.</p>",
+            "en": "<p><b>Word class:</b> Noun</p><p><b>Explanation 1:</b> A place where people live.</p><p><b>Example 1:</b> Iceland is a beautiful <b>country</b>.</p><p><b>Explanation 2:</b> Ground to stand on (not sea).</p><p><b>Example 2:</b> We finally came to <b>land</b>.</p>",
+            "tl": "<p><b>Bahagi:</b> Pangngalan</p><p><b>Paliwanag 1:</b> Lugar kung saan nakatira ang mga tao.</p><p><b>Halimbawa 1:</b> Ang Iceland ay isang magandang <b>bansa</b>.</p><p><b>Paliwanag 2:</b> Lupa na tatayuan (hindi dagat).</p><p><b>Halimbawa 2:</b> Sa wakas ay nakarating kami sa <b>lupa</b>.</p>",
+            "no": "<p><b>Ordklasse:</b> Substantiv</p><p><b>Forklaring 1:</b> Et sted hvor folk bor.</p><p><b>Eksempel 1:</b> Island er et vakkert <b>land</b>.</p><p><b>Forklaring 2:</b> Jord å stå på (ikke hav).</p><p><b>Eksempel 2:</b> Vi kom endelig i <b>land</b>.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> اسم</p><p><b>توضیح 1:</b> مکانی که مردم در آن زندگی می‌کنند.</p><p><b>مثال 1:</b> ایسلند <b>کشور</b> زیبایی است.</p><p><b>توضیح 2:</b> زمینی برای ایستادن.</p><p><b>مثال 2:</b> ما سرانجام به <b>خشکی</b> رسیدیم.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Rzeczownik</p><p><b>Wyjaśnienie 1:</b> Miejsce, w którym żyją ludzie.</p><p><b>Przykład 1:</b> Islandia to piękny <b>kraj</b>.</p><p><b>Wyjaśnienie 2:</b> Ziemia, po której można chodzić.</p><p><b>Przykład 2:</b> W końcu zeszliśmy na <b>ląd</b>.</p>",
+            "ru": "<p><b>Часть речи:</b> Существительное</p><p><b>Объяснение 1:</b> Место, где живут люди.</p><p><b>Пример 1:</b> Исландия - красивая <b>страна</b>.</p><p><b>Объяснение 2:</b> Земля, на которой можно стоять.</p><p><b>Пример 2:</b> Мы наконец вышли на <b>сушу</b>.</p>",
+            "es": "<p><b>Clase de palabra:</b> Sustantivo</p><p><b>Explicación 1:</b> Un lugar donde vive la gente.</p><p><b>Ejemplo 1:</b> Islandia es un <b>país</b> hermoso.</p><p><b>Explicación 2:</b> Tierra para pararse.</p><p><b>Ejemplo 2:</b> Finalmente llegamos a <b>tierra</b>.</p>",
+            "sv": "<p><b>Ordklass:</b> Substantiv</p><p><b>Förklaring 1:</b> En plats där folk bor.</p><p><b>Exempel 1:</b> Island är ett vackert <b>land</b>.</p><p><b>Förklaring 2:</b> Jord att stå på (inte hav).</p><p><b>Exempel 2:</b> Vi kom äntligen i <b>land</b>.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> คำนาม</p><p><b>คำอธิบาย 1:</b> สถานที่ที่ผู้คนอาศัยอยู่</p><p><b>ตัวอย่าง 1:</b> ไอซ์แลนด์เป็น<b>ประเทศ</b>ที่สวยงาม</p><p><b>คำอธิบาย 2:</b> พื้นดินที่ใช้ยืน</p><p><b>ตัวอย่าง 2:</b> ในที่สุดเราก็มาถึง<b>ฝั่ง</b></p>",
+            "uk": "<p><b>Частина мови:</b> Іменник</p><p><b>Пояснення 1:</b> Місце, де живуть люди.</p><p><b>Приклад 1:</b> Ісландія - красива <b>країна</b>.</p><p><b>Пояснення 2:</b> Земля, на якій можна стояти.</p><p><b>Приклад 2:</b> Ми нарешті вийшли на <b>сушу</b>.</p>",
+            "vi": "<p><b>Loại từ:</b> Danh từ</p><p><b>Giải thích 1:</b> Nơi mọi người sinh sống.</p><p><b>Ví dụ 1:</b> Iceland là một <b>đất nước</b> xinh đẹp.</p><p><b>Giải thích 2:</b> Mặt đất để đứng lên.</p><p><b>Ví dụ 2:</b> Cuối cùng chúng tôi cũng vào đến <b>đất liền</b>.</p>"
+        }
+    },
+    { 
+        text: "verkefni", 
+        is_exp: "<p><b>Orðflokkur:</b> Nafnorð (hvorugkyn)</p><p><b>Útskýring 1:</b> Vinna eða æfing í skólanum.</p><p><b>Dæmi 1:</b> Ég er að gera <b>verkefni</b> heima.</p><p><b>Útskýring 2:</b> Eitthvað stórt sem þarf að leysa eða klára.</p><p><b>Dæmi 2:</b> Þetta er stórt <b>verkefni</b>.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> اسم</p><p><b>الشرح 1:</b> عمل أو تمرين في المدرسة.</p><p><b>المثال 1:</b> أنا أقوم بـ<b>واجب</b> في المنزل.</p><p><b>الشرح 2:</b> شيء كبير يجب حله.</p><p><b>المثال 2:</b> هذا <b>مشروع</b> كبير.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Navneord</p><p><b>Forklaring 1:</b> Arbejde eller øvelse i skolen.</p><p><b>Eksempel 1:</b> Jeg laver en <b>opgave</b> derhjemme.</p><p><b>Forklaring 2:</b> Noget stort, der skal løses.</p><p><b>Eksempel 2:</b> Dette er et stort <b>projekt</b>.</p>",
+            "en": "<p><b>Word class:</b> Noun</p><p><b>Explanation 1:</b> Work or exercise in school.</p><p><b>Example 1:</b> I am doing an <b>assignment</b> at home.</p><p><b>Explanation 2:</b> Something big that needs to be solved.</p><p><b>Example 2:</b> This is a big <b>project</b>.</p>",
+            "tl": "<p><b>Bahagi:</b> Pangngalan</p><p><b>Paliwanag 1:</b> Trabaho o pagsasanay sa paaralan.</p><p><b>Halimbawa 1:</b> Gumagawa ako ng <b>takdang-aralin</b> sa bahay.</p><p><b>Paliwanag 2:</b> Isang malaking bagay na kailangang lutasin.</p><p><b>Halimbawa 2:</b> Ito ay isang malaking <b>proyekto</b>.</p>",
+            "no": "<p><b>Ordklasse:</b> Substantiv</p><p><b>Forklaring 1:</b> Arbeid eller øvelse på skolen.</p><p><b>Eksempel 1:</b> Jeg gjør en <b>oppgave</b> hjemme.</p><p><b>Forklaring 2:</b> Noe stort som må løses.</p><p><b>Eksempel 2:</b> Dette er et stort <b>prosjekt</b>.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> اسم</p><p><b>توضیح 1:</b> کار یا تمرین در مدرسه.</p><p><b>مثال 1:</b> من در حال انجام <b>تکلیف</b> هستم.</p><p><b>توضیح 2:</b> چیز بزرگی که باید حل شود.</p><p><b>مثال 2:</b> این یک <b>پروژه</b> بزرگ است.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Rzeczownik</p><p><b>Wyjaśnienie 1:</b> Praca lub ćwiczenie w szkole.</p><p><b>Przykład 1:</b> Robię <b>zadanie</b> w domu.</p><p><b>Wyjaśnienie 2:</b> Coś dużego, co trzeba rozwiązać.</p><p><b>Przykład 2:</b> To jest duży <b>projekt</b>.</p>",
+            "ru": "<p><b>Часть речи:</b> Существительное</p><p><b>Объяснение 1:</b> Работа или упражнение в школе.</p><p><b>Пример 1:</b> Я делаю <b>задание</b> дома.</p><p><b>Объяснение 2:</b> Что-то большое, что нужно решить.</p><p><b>Пример 2:</b> Это большой <b>проект</b>.</p>",
+            "es": "<p><b>Clase de palabra:</b> Sustantivo</p><p><b>Explicación 1:</b> Trabajo o ejercicio en la escuela.</p><p><b>Ejemplo 1:</b> Estoy haciendo una <b>tarea</b> en casa.</p><p><b>Explicación 2:</b> Algo grande que necesita ser resuelto.</p><p><b>Ejemplo 2:</b> Este es un gran <b>proyecto</b>.</p>",
+            "sv": "<p><b>Ordklass:</b> Substantiv</p><p><b>Förklaring 1:</b> Arbete eller övning i skolan.</p><p><b>Exempel 1:</b> Jag gör en <b>uppgift</b> hemma.</p><p><b>Förklaring 2:</b> Något stort som behöver lösas.</p><p><b>Exempel 2:</b> Det här är ett stort <b>projekt</b>.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> คำนาม</p><p><b>คำอธิบาย 1:</b> งานหรือแบบฝึกหัดในโรงเรียน</p><p><b>ตัวอย่าง 1:</b> ฉันกำลังทำ<b>งานมอบหมาย</b>ที่บ้าน</p><p><b>คำอธิบาย 2:</b> สิ่งที่ยิ่งใหญ่ที่ต้องแก้ไข</p><p><b>ตัวอย่าง 2:</b> นี่คือ<b>โครงการ</b>ที่ใหญ่มาก</p>",
+            "uk": "<p><b>Частина мови:</b> Іменник</p><p><b>Пояснення 1:</b> Робота або вправа в школі.</p><p><b>Приклад 1:</b> Я роблю <b>завдання</b> вдома.</p><p><b>Пояснення 2:</b> Щось велике, що потрібно вирішити.</p><p><b>Приклад 2:</b> Це великий <b>проект</b>.</p>",
+            "vi": "<p><b>Loại từ:</b> Danh từ</p><p><b>Giải thích 1:</b> Công việc hoặc bài tập ở trường.</p><p><b>Ví dụ 1:</b> Tôi đang làm <b>bài tập</b> ở nhà.</p><p><b>Giải thích 2:</b> Một việc lớn cần được giải quyết.</p><p><b>Ví dụ 2:</b> Đây là một <b>dự án</b> lớn.</p>"
+        }
+    },
+    { 
+        text: "kallast", 
+        is_exp: "<p><b>Orðflokkur:</b> Sagnorð (miðmynd)</p><p><b>Útskýring 1:</b> Að heita eitthvað.</p><p><b>Dæmi 1:</b> Hvað <b>kallast</b> þetta á íslensku?</p><p><b>Útskýring 2:</b> Að fólk noti ákveðið nafn yfir einhvern.</p><p><b>Dæmi 2:</b> Hann heitir Jón en <b>kallast</b> Nonni.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> فعل</p><p><b>الشرح 1:</b> أن يُسمى بشيء ما.</p><p><b>المثال 1:</b> ماذا <b>يُسمى</b> هذا بالآيسلندية؟</p><p><b>الشرح 2:</b> أن يستخدم الناس اسماً معيناً لشخص ما.</p><p><b>المثال 2:</b> اسمه يون لكنه <b>يُدعى</b> نوني.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Udsagnsord</p><p><b>Forklaring 1:</b> At hedde noget (blive kaldt).</p><p><b>Eksempel 1:</b> Hvad <b>kaldes</b> dette på islandsk?</p><p><b>Forklaring 2:</b> At folk bruger et bestemt navn.</p><p><b>Eksempel 2:</b> Han hedder Jón, men <b>kaldes</b> Nonni.</p>",
+            "en": "<p><b>Word class:</b> Verb</p><p><b>Explanation 1:</b> To be called or named something.</p><p><b>Example 1:</b> What is this <b>called</b> in Icelandic?</p><p><b>Explanation 2:</b> When people use a specific name for someone.</p><p><b>Example 2:</b> His name is Jón but he is <b>called</b> Nonni.</p>",
+            "tl": "<p><b>Bahagi:</b> Pandiwa</p><p><b>Paliwanag 1:</b> Matawag o mapangalanan ng isang bagay.</p><p><b>Halimbawa 1:</b> Ano ang <b>tawag</b> dito sa Icelandic?</p><p><b>Paliwanag 2:</b> Kapag gumagamit ang mga tao ng partikular na pangalan.</p><p><b>Halimbawa 2:</b> Jón ang pangalan niya pero <b>tinatawag</b> siyang Nonni.</p>",
+            "no": "<p><b>Ordklasse:</b> Verb</p><p><b>Forklaring 1:</b> Å hete noe (bli kalt).</p><p><b>Eksempel 1:</b> Hva <b>kalles</b> dette på islandsk?</p><p><b>Forklaring 2:</b> At folk bruker et bestemt navn.</p><p><b>Eksempel 2:</b> Han heter Jón, men <b>kalles</b> Nonni.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> فعل</p><p><b>توضیح 1:</b> نامیده شدن به چیزی.</p><p><b>مثال 1:</b> این در ایسلندی چه <b>نامیده می‌شود</b>؟</p><p><b>توضیح 2:</b> وقتی از نام خاصی برای کسی استفاده می‌کنند.</p><p><b>مثال 2:</b> نام او یون است اما نونی <b>نامیده می‌شود</b>.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Czasownik</p><p><b>Wyjaśnienie 1:</b> Nazywać się czymś.</p><p><b>Przykład 1:</b> Jak to się <b>nazywa</b> po islandzku?</p><p><b>Wyjaśnienie 2:</b> Gdy ludzie używają konkretnego imienia dla kogoś.</p><p><b>Przykład 2:</b> Ma na imię Jón, ale <b>wołają na niego</b> Nonni.</p>",
+            "ru": "<p><b>Часть речи:</b> Глагол</p><p><b>Объяснение 1:</b> Называться чем-то.</p><p><b>Пример 1:</b> Как это <b>называется</b> по-исландски?</p><p><b>Объяснение 2:</b> Когда люди используют определенное имя.</p><p><b>Пример 2:</b> Его зовут Йон, но его <b>называют</b> Нонни.</p>",
+            "es": "<p><b>Clase de palabra:</b> Verbo</p><p><b>Explicación 1:</b> Ser llamado o nombrado algo.</p><p><b>Ejemplo 1:</b> ¿Cómo se <b>llama</b> esto en islandés?</p><p><b>Explicación 2:</b> Cuando se usa un nombre específico para alguien.</p><p><b>Ejemplo 2:</b> Su nombre es Jón pero le <b>llaman</b> Nonni.</p>",
+            "sv": "<p><b>Ordklass:</b> Verb</p><p><b>Förklaring 1:</b> Att heta något (kallas).</p><p><b>Exempel 1:</b> Vad <b>kallas</b> det här på isländska?</p><p><b>Förklaring 2:</b> När folk använder ett visst namn för någon.</p><p><b>Exempel 2:</b> Han heter Jón men <b>kallas</b> Nonni.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> คำกริยา</p><p><b>คำอธิบาย 1:</b> ถูกเรียกว่าหรือตั้งชื่อว่า</p><p><b>ตัวอย่าง 1:</b> สิ่งนี้<b>เรียกว่า</b>อะไรในภาษาไอซ์แลนด์?</p><p><b>คำอธิบาย 2:</b> เมื่อผู้คนใช้ชื่อเฉพาะเรียกใครบางคน</p><p><b>ตัวอย่าง 2:</b> เขาชื่อยอนแต่<b>ถูกเรียกว่า</b>นนนี่</p>",
+            "uk": "<p><b>Частина мови:</b> Дієслово</p><p><b>Пояснення 1:</b> Називатися чимось.</p><p><b>Приклад 1:</b> Як це <b>називається</b> ісландською?</p><p><b>Пояснення 2:</b> Коли люди використовують певне ім'я.</p><p><b>Приклад 2:</b> Його звати Йон, але його <b>називають</b> Нонні.</p>",
+            "vi": "<p><b>Loại từ:</b> Động từ</p><p><b>Giải thích 1:</b> Được gọi hoặc được đặt tên là gì đó.</p><p><b>Ví dụ 1:</b> Cái này được <b>gọi là</b> gì trong tiếng Iceland?</p><p><b>Giải thích 2:</b> Khi mọi người dùng một cái tên cụ thể để gọi.</p><p><b>Ví dụ 2:</b> Tên anh ấy là Jón nhưng anh ấy được <b>gọi là</b> Nonni.</p>"
+        }
+    },
+    { 
+        text: "eigin", 
+        is_exp: "<p><b>Orðflokkur:</b> Lýsingarorð</p><p><b>Útskýring 1:</b> Eitthvað sem maður á alveg sjálfur.</p><p><b>Dæmi 1:</b> Ég á minn <b>eigin</b> bíl.</p><p><b>Útskýring 2:</b> Eitthvað sem tilheyrir manni beint.</p><p><b>Dæmi 2:</b> Við eigum okkar <b>eigin</b> hús.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> صفة</p><p><b>الشرح 1:</b> شيء يمتلكه المرء بالكامل.</p><p><b>المثال 1:</b> لدي سيارتي <b>الخاصة</b>.</p><p><b>الشرح 2:</b> شيء ينتمي إليك مباشرة.</p><p><b>المثال 2:</b> نحن نمتلك منزلنا <b>الخاص</b>.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Tillægsord</p><p><b>Forklaring 1:</b> Noget, man selv ejer fuldt ud.</p><p><b>Eksempel 1:</b> Jeg har min <b>egen</b> bil.</p><p><b>Forklaring 2:</b> Noget, der tilhører en direkte.</p><p><b>Eksempel 2:</b> Vi ejer vores <b>eget</b> hus.</p>",
+            "en": "<p><b>Word class:</b> Adjective</p><p><b>Explanation 1:</b> Something that one owns completely.</p><p><b>Example 1:</b> I have my <b>own</b> car.</p><p><b>Explanation 2:</b> Something that belongs directly to you.</p><p><b>Example 2:</b> We own our <b>own</b> house.</p>",
+            "tl": "<p><b>Bahagi:</b> Pang-uri</p><p><b>Paliwanag 1:</b> Isang bagay na ganap na pag-aari ng isang tao.</p><p><b>Halimbawa 1:</b> Mayroon akong <b>sariling</b> kotse.</p><p><b>Paliwanag 2:</b> Isang bagay na direktang pag-aari mo.</p><p><b>Halimbawa 2:</b> Pag-aari namin ang aming <b>sariling</b> bahay.</p>",
+            "no": "<p><b>Ordklasse:</b> Adjektiv</p><p><b>Forklaring 1:</b> Noe man eier helt selv.</p><p><b>Eksempel 1:</b> Jeg har min <b>egen</b> bil.</p><p><b>Forklaring 2:</b> Noe som tilhører en direkte.</p><p><b>Eksempel 2:</b> Vi eier vårt <b>eget</b> hus.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> صفت</p><p><b>توضیح 1:</b> چیزی که کاملاً متعلق به خود شخص است.</p><p><b>مثال 1:</b> من ماشین <b>خودم</b> را دارم.</p><p><b>توضیح 2:</b> چیزی که مستقیماً به شما تعلق دارد.</p><p><b>مثال 2:</b> ما خانه <b>خودمان</b> را داریم.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Przymiotnik</p><p><b>Wyjaśnienie 1:</b> Coś, co posiada się na własność.</p><p><b>Przykład 1:</b> Mam swój <b>własny</b> samochód.</p><p><b>Wyjaśnienie 2:</b> Coś, co bezpośrednio należy do Ciebie.</p><p><b>Przykład 2:</b> Mamy swój <b>własny</b> dom.</p>",
+            "ru": "<p><b>Часть речи:</b> Прилагательное</p><p><b>Объяснение 1:</b> То, чем человек полностью владеет.</p><p><b>Пример 1:</b> У меня есть моя <b>собственная</b> машина.</p><p><b>Объяснение 2:</b> То, что принадлежит непосредственно вам.</p><p><b>Пример 2:</b> Мы владеем нашим <b>собственным</b> домом.</p>",
+            "es": "<p><b>Clase de palabra:</b> Adjetivo</p><p><b>Explicación 1:</b> Algo que uno posee completamente.</p><p><b>Ejemplo 1:</b> Tengo mi <b>propio</b> coche.</p><p><b>Explicación 2:</b> Algo que te pertenece directamente.</p><p><b>Ejemplo 2:</b> Tenemos nuestra <b>propia</b> casa.</p>",
+            "sv": "<p><b>Ordklass:</b> Adjektiv</p><p><b>Förklaring 1:</b> Något man äger helt själv.</p><p><b>Exempel 1:</b> Jag har min <b>egen</b> bil.</p><p><b>Förklaring 2:</b> Något som tillhör en direkt.</p><p><b>Exempel 2:</b> Vi äger vårt <b>eget</b> hus.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> คำคุณศัพท์</p><p><b>คำอธิบาย 1:</b> สิ่งที่บุคคลเป็นเจ้าของโดยสมบูรณ์</p><p><b>ตัวอย่าง 1:</b> ฉันมีรถของฉัน<b>เอง</b></p><p><b>คำอธิบาย 2:</b> สิ่งที่เป็นของคุณโดยตรง</p><p><b>ตัวอย่าง 2:</b> เรามีบ้านของพวกเรา<b>เอง</b></p>",
+            "uk": "<p><b>Частина мови:</b> Прикметник</p><p><b>Пояснення 1:</b> Те, чим людина повністю володіє.</p><p><b>Приклад 1:</b> У мене є моя <b>власна</b> машина.</p><p><b>Пояснення 2:</b> Те, що належить безпосередньо вам.</p><p><b>Приклад 2:</b> Ми володіємо нашим <b>власним</b> будинком.</p>",
+            "vi": "<p><b>Loại từ:</b> Tính từ</p><p><b>Giải thích 1:</b> Một thứ gì đó mà một người hoàn toàn sở hữu.</p><p><b>Ví dụ 1:</b> Tôi có xe <b>riêng</b> của mình.</p><p><b>Giải thích 2:</b> Một thứ gì đó thuộc trực tiếp về bạn.</p><p><b>Ví dụ 2:</b> Chúng tôi sở hữu ngôi nhà <b>riêng</b> của mình.</p>"
+        }
+    },
+    { 
+        text: "önnur", 
+        is_exp: "<p><b>Orðflokkur:</b> Fornafn / Töluorð</p><p><b>Útskýring 1:</b> Ekki þessi heldur eitthvað annað (fleirtala eða kvenkyn).</p><p><b>Dæmi 1:</b> Hún fór í <b>önnur</b> föt.</p><p><b>Útskýring 2:</b> Tala eða númer tvö í röðinni.</p><p><b>Dæmi 2:</b> Hún er <b>önnur</b> í röðinni.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> ضمير / عدد</p><p><b>الشرح 1:</b> ليس هذا، بل مختلف (أخرى).</p><p><b>المثال 1:</b> ارتدت ملابس <b>أخرى</b>.</p><p><b>الشرح 2:</b> الرقم اثنان في الترتيب.</p><p><b>المثال 2:</b> هي <b>الثانية</b> في الطابور.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Stedord / Ordenstal</p><p><b>Forklaring 1:</b> Ikke denne, men en forskellig (andre).</p><p><b>Eksempel 1:</b> Hun tog <b>andre</b> klæder på.</p><p><b>Forklaring 2:</b> Nummer to i en rækkefølge.</p><p><b>Eksempel 2:</b> Hun er den <b>anden</b> i rækken.</p>",
+            "en": "<p><b>Word class:</b> Pronoun / Numeral</p><p><b>Explanation 1:</b> Not this one, but a different one (other).</p><p><b>Example 1:</b> She put on <b>other</b> clothes.</p><p><b>Explanation 2:</b> Number two in an order (second).</p><p><b>Example 2:</b> She is <b>second</b> in line.</p>",
+            "tl": "<p><b>Bahagi:</b> Panghalip / Pamilang</p><p><b>Paliwanag 1:</b> Hindi ito, kundi iba (iba).</p><p><b>Halimbawa 1:</b> Nagsuot siya ng <b>ibang</b> damit.</p><p><b>Paliwanag 2:</b> Numero dalawa sa pagkakasunud-sunod.</p><p><b>Halimbawa 2:</b> Siya ang <b>ikalawa</b> sa pila.</p>",
+            "no": "<p><b>Ordklasse:</b> Pronomen / Ordenstall</p><p><b>Forklaring 1:</b> Ikke denne, men en annen (andre).</p><p><b>Eksempel 1:</b> Hun tok på seg <b>andre</b> klær.</p><p><b>Forklaring 2:</b> Nummer to i en rekkefølge.</p><p><b>Eksempel 2:</b> Hun er nummer <b>to (den andre)</b> i køen.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> ضمیر / عدد</p><p><b>توضیح 1:</b> نه این، بلکه یکی دیگر (دیگر).</p><p><b>مثال 1:</b> او لباس‌های <b>دیگری</b> پوشید.</p><p><b>توضیح 2:</b> شماره دو در یک ترتیب.</p><p><b>مثال 2:</b> او نفر <b>دوم</b> در صف است.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Zaimek / Liczebnik</p><p><b>Wyjaśnienie 1:</b> Nie ten, lecz inny (inne).</p><p><b>Przykład 1:</b> Założyła <b>inne</b> ubrania.</p><p><b>Wyjaśnienie 2:</b> Numer dwa w kolejności.</p><p><b>Przykład 2:</b> Ona jest <b>druga</b> w kolejce.</p>",
+            "ru": "<p><b>Часть речи:</b> Местоимение / Числительное</p><p><b>Объяснение 1:</b> Не этот, а другой (другие).</p><p><b>Пример 1:</b> Она надела <b>другую</b> одежду.</p><p><b>Объяснение 2:</b> Номер два по порядку.</p><p><b>Пример 2:</b> Она <b>вторая</b> в очереди.</p>",
+            "es": "<p><b>Clase de palabra:</b> Pronombre / Numeral</p><p><b>Explicación 1:</b> No este, sino uno diferente (otra / otras).</p><p><b>Ejemplo 1:</b> Ella se puso <b>otra</b> ropa.</p><p><b>Explicación 2:</b> Número dos en un orden.</p><p><b>Ejemplo 2:</b> Ella es la <b>segunda</b> en la fila.</p>",
+            "sv": "<p><b>Ordklass:</b> Pronomen / Ordningstal</p><p><b>Förklaring 1:</b> Inte den här, utan en annan (andra).</p><p><b>Exempel 1:</b> Hon tog på sig <b>andra</b> kläder.</p><p><b>Förklaring 2:</b> Nummer två i en ordning.</p><p><b>Exempel 2:</b> Hon är <b>andra</b> i kön.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> สรรพนาม / ตัวเลข</p><p><b>คำอธิบาย 1:</b> ไม่ใช่อันนี้ แต่เป็นอันอื่น (อื่นๆ)</p><p><b>ตัวอย่าง 1:</b> เธอสวมเสื้อผ้าชุด<b>อื่น</b></p><p><b>คำอธิบาย 2:</b> ลำดับที่สอง (ที่สอง)</p><p><b>ตัวอย่าง 2:</b> เธอเป็นคน<b>ที่สอง</b>ในแถว</p>",
+            "uk": "<p><b>Частина мови:</b> Займенник / Числівник</p><p><b>Пояснення 1:</b> Не цей, а інший (інші).</p><p><b>Приклад 1:</b> Вона одягла <b>інший</b> одяг.</p><p><b>Пояснення 2:</b> Номер два за порядком.</p><p><b>Приклад 2:</b> Вона <b>друга</b> в черзі.</p>",
+            "vi": "<p><b>Loại từ:</b> Đại từ / Số từ</p><p><b>Giải thích 1:</b> Không phải cái này, mà là một cái khác (khác).</p><p><b>Ví dụ 1:</b> Cô ấy mặc bộ quần áo <b>khác</b>.</p><p><b>Giải thích 2:</b> Số hai theo thứ tự (thứ hai).</p><p><b>Ví dụ 2:</b> Cô ấy đứng <b>thứ hai</b> trong hàng.</p>"
+        }
+    },
+    { 
+        text: "farið", 
+        is_exp: "<p><b>Orðflokkur:</b> Sagnorð (lýsingarháttur)</p><p><b>Útskýring 1:</b> Að hafa farið eitthvað (í þátíð).</p><p><b>Dæmi 1:</b> Ég hef <b>farið</b> til Spánar.</p><p><b>Útskýring 2:</b> Þegar fólk er farið burt eða ekki lengur hér.</p><p><b>Dæmi 2:</b> Er fólkið <b>farið</b>?</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> فعل</p><p><b>الشرح 1:</b> فعل الذهاب في الماضي (لقد ذهب).</p><p><b>المثال 1:</b> لقد <b>ذهبت</b> إلى إسبانيا.</p><p><b>الشرح 2:</b> عندما يغادر الأشخاص.</p><p><b>المثال 2:</b> هل <b>غادر</b> الناس؟</p></div>",
+            "da": "<p><b>Ordklasse:</b> Udsagnsord</p><p><b>Forklaring 1:</b> At have rejst et sted hen (har været/taget).</p><p><b>Eksempel 1:</b> Jeg er <b>taget (har været)</b> til Spanien.</p><p><b>Forklaring 2:</b> Når folk er taget væk.</p><p><b>Eksempel 2:</b> Er folk <b>taget afsted</b>?</p>",
+            "en": "<p><b>Word class:</b> Verb</p><p><b>Explanation 1:</b> To have gone somewhere in the past.</p><p><b>Example 1:</b> I have <b>gone</b> to Spain.</p><p><b>Explanation 2:</b> When someone has left and is no longer here.</p><p><b>Example 2:</b> Are the people <b>gone</b>?</p>",
+            "tl": "<p><b>Bahagi:</b> Pandiwa</p><p><b>Paliwanag 1:</b> Ang pumunta sa nakaraan (ay pumunta).</p><p><b>Halimbawa 1:</b> <b>Nakapunta</b> na ako sa Spain.</p><p><b>Paliwanag 2:</b> Kapag umalis na ang mga tao.</p><p><b>Halimbawa 2:</b> <b>Umalis</b> na ba ang mga tao?</p>",
+            "no": "<p><b>Ordklasse:</b> Verb</p><p><b>Forklaring 1:</b> Å ha dratt et sted (har dratt).</p><p><b>Eksempel 1:</b> Jeg har <b>dratt (vært)</b> til Spania.</p><p><b>Forklaring 2:</b> Når folk har dratt bort.</p><p><b>Eksempel 2:</b> Har folk <b>dratt</b>?</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> فعل</p><p><b>توضیح 1:</b> فعل رفتن در زمان گذشته (رفته است).</p><p><b>مثال 1:</b> من به اسپانیا <b>رفته‌ام</b>.</p><p><b>توضیح 2:</b> وقتی افراد رفته‌اند.</p><p><b>مثال 2:</b> آیا مردم <b>رفته‌اند</b>؟</p></div>",
+            "pl": "<p><b>Część mowy:</b> Czasownik</p><p><b>Wyjaśnienie 1:</b> Czasownik pojechać/pójść w czasie przeszłym.</p><p><b>Przykład 1:</b> <b>Pojechałem</b> do Hiszpanii.</p><p><b>Wyjaśnienie 2:</b> Gdy ludzie wyszli i już ich tu nie ma.</p><p><b>Przykład 2:</b> Czy ludzie już <b>poszli (wyjechali)</b>?</p>",
+            "ru": "<p><b>Часть речи:</b> Глагол</p><p><b>Объяснение 1:</b> Глагол 'ехать/идти' в прошедшем времени.</p><p><b>Пример 1:</b> Я <b>ездил</b> в Испанию.</p><p><b>Объяснение 2:</b> Когда люди ушли.</p><p><b>Пример 2:</b> Люди <b>ушли (уехали)</b>?</p>",
+            "es": "<p><b>Clase de palabra:</b> Verbo</p><p><b>Explicación 1:</b> El verbo ir en el pasado (haber ido).</p><p><b>Ejemplo 1:</b> He <b>ido</b> a España.</p><p><b>Explicación 2:</b> Cuando la gente se ha ido.</p><p><b>Ejemplo 2:</b> ¿Se ha <b>ido</b> la gente?</p>",
+            "sv": "<p><b>Ordklass:</b> Verb</p><p><b>Förklaring 1:</b> Verbet att åka/fara i dåtid (har åkt).</p><p><b>Exempel 1:</b> Jag har <b>åkt</b> till Spanien.</p><p><b>Förklaring 2:</b> När folk har gett sig iväg.</p><p><b>Exempel 2:</b> Har folket <b>åkt (farit)</b>?</p>",
+            "th": "<p><b>ชนิดของคำ:</b> คำกริยา</p><p><b>คำอธิบาย 1:</b> คำกริยาว่าไป ในอดีตกาล</p><p><b>ตัวอย่าง 1:</b> ฉันเคย<b>ไป</b>สเปนมาแล้ว</p><p><b>คำอธิบาย 2:</b> เมื่อผู้คนจากไป</p><p><b>ตัวอย่าง 2:</b> ผู้คน<b>ไปกันหมด</b>แล้วหรือ?</p>",
+            "uk": "<p><b>Частина мови:</b> Дієслово</p><p><b>Пояснення 1:</b> Дієслово 'їхати/йти' в минулому часі.</p><p><b>Приклад 1:</b> Я <b>їздив</b> до Іспанії.</p><p><b>Пояснення 2:</b> Коли люди пішли.</p><p><b>Приклад 2:</b> Люди <b>пішли</b>?</p>",
+            "vi": "<p><b>Loại từ:</b> Động từ</p><p><b>Giải thích 1:</b> Động từ đi trong quá khứ.</p><p><b>Ví dụ 1:</b> Tôi đã <b>đi</b> đến Tây Ban Nha.</p><p><b>Giải thích 2:</b> Khi mọi người đã rời đi.</p><p><b>Ví dụ 2:</b> Mọi người <b>đã đi</b> hết chưa?</p>"
+        }
+    },
+    { 
+        text: "ofan", 
+        is_exp: "<p><b>Orðflokkur:</b> Atviksorð</p><p><b>Útskýring 1:</b> Að koma niður frá háum stað.</p><p><b>Dæmi 1:</b> Kötturinn kom <b>ofan</b> af þakinu.</p><p><b>Útskýring 2:</b> Eitthvað sem kemur úr loftinu eða að ofan.</p><p><b>Dæmi 2:</b> Vatnið kemur að <b>ofan</b>.</p>",
+        translations: {
+            "ar": "<div dir='rtl' style='text-align: right;'><p><b>نوع الكلمة:</b> ظرف</p><p><b>الشرح 1:</b> النزول من مكان مرتفع.</p><p><b>المثال 1:</b> نزل القط <b>من أعلى</b> السقف.</p><p><b>الشرح 2:</b> شيء يأتي من الأعلى.</p><p><b>المثال 2:</b> الماء يأتي من <b>الأعلى</b>.</p></div>",
+            "da": "<p><b>Ordklasse:</b> Biord</p><p><b>Forklaring 1:</b> At komme ned fra et højt sted.</p><p><b>Eksempel 1:</b> Katten kom ned <b>oppefra</b> taget.</p><p><b>Forklaring 2:</b> Noget, der kommer oppefra luften.</p><p><b>Eksempel 2:</b> Vandet kommer <b>oppefra</b>.</p>",
+            "en": "<p><b>Word class:</b> Adverb</p><p><b>Explanation 1:</b> Coming down from a high place.</p><p><b>Example 1:</b> The cat came <b>down (from above)</b> off the roof.</p><p><b>Explanation 2:</b> Something coming from above.</p><p><b>Example 2:</b> The water comes from <b>above</b>.</p>",
+            "tl": "<p><b>Bahagi:</b> Pang-abay</p><p><b>Paliwanag 1:</b> Pagbaba mula sa mataas na lugar.</p><p><b>Halimbawa 1:</b> Bumaba ang pusa <b>mula sa itaas</b> ng bubong.</p><p><b>Paliwanag 2:</b> Isang bagay na nagmumula sa itaas.</p><p><b>Halimbawa 2:</b> Ang tubig ay nagmumula sa <b>itaas</b>.</p>",
+            "no": "<p><b>Ordklasse:</b> Adverb</p><p><b>Forklaring 1:</b> Å komme ned fra et høyt sted.</p><p><b>Eksempel 1:</b> Katten kom ned <b>ovenfra</b> taket.</p><p><b>Forklaring 2:</b> Noe som kommer ovenfra.</p><p><b>Eksempel 2:</b> Vannet kommer <b>ovenfra</b>.</p>",
+            "fa": "<div dir='rtl' style='text-align: right;'><p><b>نوع کلمه:</b> قید</p><p><b>توضیح 1:</b> پایین آمدن از یک مکان مرتفع.</p><p><b>مثال 1:</b> گربه <b>از بالای</b> سقف پایین آمد.</p><p><b>توضیح 2:</b> چیزی که از بالا می‌آید.</p><p><b>مثال 2:</b> آب از <b>بالا</b> می‌آید.</p></div>",
+            "pl": "<p><b>Część mowy:</b> Przysłówek</p><p><b>Wyjaśnienie 1:</b> Zejście z wysokiego miejsca.</p><p><b>Przykład 1:</b> Kot zszedł <b>z góry (z)</b> dachu.</p><p><b>Wyjaśnienie 2:</b> Coś nadchodzącego z góry.</p><p><b>Przykład 2:</b> Woda leci z <b>góry</b>.</p>",
+            "ru": "<p><b>Часть речи:</b> Наречие</p><p><b>Объяснение 1:</b> Спускаться с высокого места.</p><p><b>Пример 1:</b> Кот спустился <b>сверху</b> с крыши.</p><p><b>Объяснение 2:</b> Что-то, идущее сверху.</p><p><b>Пример 2:</b> Вода льется <b>сверху</b>.</p>",
+            "es": "<p><b>Clase de palabra:</b> Adverbio</p><p><b>Explicación 1:</b> Bajar de un lugar alto.</p><p><b>Ejemplo 1:</b> El gato bajó <b>de arriba</b> del techo.</p><p><b>Explicación 2:</b> Algo que viene de arriba.</p><p><b>Ejemplo 2:</b> El agua viene de <b>arriba</b>.</p>",
+            "sv": "<p><b>Ordklass:</b> Adverb</p><p><b>Förklaring 1:</b> Att komma ner från en hög plats.</p><p><b>Exempel 1:</b> Katten kom ner <b>uppifrån</b> taket.</p><p><b>Förklaring 2:</b> Något som kommer uppifrån.</p><p><b>Exempel 2:</b> Vattnet kommer <b>uppifrån</b>.</p>",
+            "th": "<p><b>ชนิดของคำ:</b> กริยาวิเศษณ์</p><p><b>คำอธิบาย 1:</b> ลงมาจากที่สูง</p><p><b>ตัวอย่าง 1:</b> แมวลงมา<b>จากข้างบน</b>หลังคา</p><p><b>คำอธิบาย 2:</b> สิ่งที่มาจากข้างบน</p><p><b>ตัวอย่าง 2:</b> น้ำมาจาก<b>ข้างบน</b></p>",
+            "uk": "<p><b>Частина мови:</b> Прислівник</p><p><b>Пояснення 1:</b> Спускатися з високого місця.</p><p><b>Приклад 1:</b> Кіт спустився <b>зверху</b> з даху.</p><p><b>Пояснення 2:</b> Щось, що йде зверху.</p><p><b>Приклад 2:</b> Вода ллється <b>зверху</b>.</p>",
+            "vi": "<p><b>Loại từ:</b> Trạng từ</p><p><b>Giải thích 1:</b> Đi xuống từ một nơi cao.</p><p><b>Ví dụ 1:</b> Con mèo đi xuống <b>từ trên</b> mái nhà.</p><p><b>Giải thích 2:</b> Một thứ gì đó đến từ trên cao.</p><p><b>Ví dụ 2:</b> Nước đến từ <b>trên cao</b>.</p>"
+        }
+    }
+];
+
+let userScores = new Array(exerciseData.length).fill(null);
+let userSpoken = new Array(exerciseData.length).fill("");
+let currentIndex = 0, recognition, isRecording = false, autoAdvanceTimer = null, hasDownloadedCert = false;
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'is-IS';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onend = () => {
+        isRecording = false;
+        const btn = document.getElementById('record-btn');
+        if (btn) { btn.innerText = "🎤 Tala"; btn.classList.remove('recording'); }
+        const resDiv = document.getElementById('result');
+        if (resDiv && resDiv.innerText === "Hlusta...") resDiv.innerText = "";
+    };
+} else {
+    alert("Þessi vafri styður ekki talgreiningu. Notaðu Chrome eða Edge á tölvu.");
+}
+
+window.onload = () => { updateUI(); };
+
+function updateProgress() {
+    let correctCount = 0;
+    for (let i = 0; i < userScores.length; i++) { if (userScores[i] === 100) correctCount++; }
+    const percent = (correctCount / exerciseData.length) * 100;
+    const progressBar = document.getElementById('progress-bar');
+    if(progressBar) progressBar.style.width = percent + '%';
+    return correctCount;
+}
+
+function findNextUnfinished() {
+    for (let i = 0; i < userScores.length; i++) {
+        if (userScores[i] !== 100) { currentIndex = i; break; }
+    }
+    document.getElementById('completion-view').style.display = 'none';
+    document.getElementById('exercise-view').style.display = 'block';
+    updateUI();
+}
+
+function updateUI() {
+    clearTimeout(autoAdvanceTimer); 
+    const correctCount = updateProgress();
+
+    if (currentIndex >= exerciseData.length) {
+        document.getElementById('exercise-view').style.display = 'none';
+        const completionView = document.getElementById('completion-view');
+        completionView.style.display = 'block';
+
+        if (correctCount === exerciseData.length) {
+            completionView.innerHTML = `
+                <div class="progress-container"><div id="progress-bar" style="width: 100%;"></div></div>
+                <h1 style="color: #34a853; font-size: 2.5em;">Frábært! Þú náðir 100% árangri! 🎉</h1>
+                <p style="font-size: 1.2em; color: #555;">Skrifaðu nafnið þitt hér að neðan til að sækja viðurkenningarskjalið þitt.</p>
+                <input type="text" id="studentName" placeholder="Skrifaðu nafnið þitt hér" autocomplete="off" ${hasDownloadedCert ? 'disabled' : ''}><br>
+                <button id="cert-btn" class="btn" style="background-color: ${hasDownloadedCert ? '#5f6368' : '#1a73e8'}; font-size: 1.5em; padding: 15px 30px; margin-top: 10px; cursor: ${hasDownloadedCert ? 'not-allowed' : 'pointer'}; opacity: ${hasDownloadedCert ? '0.7' : '1'};" onclick="downloadCert()" ${hasDownloadedCert ? 'disabled' : ''}>
+                    ${hasDownloadedCert ? '✅ Skjal sótt' : '🏆 Sækja viðurkenningarskjal'}
+                </button>
+                <br><br>
+                <button class="btn" style="background-color: #5f6368;" onclick="location.reload()">🔄 Byrja nýja umferð</button>
+                <div class="feedback-note">Vinsamlegast sendið ábendingar á <a href="mailto:dgu@fb.is">dgu@fb.is</a></div>
+            `;
+        } else {
+            completionView.innerHTML = `
+                <div class="progress-container"><div id="progress-bar" style="width: ${(correctCount/exerciseData.length)*100}%;"></div></div>
+                <h1 style="color: #fbbc05; font-size: 2em;">Þú ert næstum því búin(n)!</h1>
+                <p style="font-size: 1.2em;">Þú hefur klárað ${correctCount} af ${exerciseData.length} orðum með 100% árangri.</p>
+                <p style="font-size: 1.1em; color: #555;">Farðu til baka og reyndu aftur við þau orð sem vantaði upp á til að fá skjalið.</p>
+                <button class="btn" style="background-color: #fbbc05; color: #000;" onclick="findNextUnfinished()">➡️ Fara á orð sem vantar</button>
+                <div class="feedback-note">Vinsamlegast sendið ábendingar á <a href="mailto:dgu@fb.is">dgu@fb.is</a></div>
+            `;
+        }
+        return;
+    }
+
+    const curr = exerciseData[currentIndex];
+    const langSelect = document.getElementById('languageSelect');
+    const selectedLang = langSelect ? langSelect.value : 'none';
+
+    document.getElementById('target').innerHTML = curr.text;
+    document.getElementById('is-explanation').innerHTML = curr.is_exp;
+    document.getElementById('counter').innerText = `Orð ${currentIndex + 1} af ${exerciseData.length}`;
+    
+    const mediaBox = document.getElementById('media-box');
+    if (selectedLang === 'none' || selectedLang === "") {
+        mediaBox.innerHTML = "<i style='color: #666;'>Vinsamlegast veldu tungumál af listanum að ofan til að sjá þýðingu.</i>";
+    } else {
+        mediaBox.innerHTML = curr.translations[selectedLang] || "Þýðing ekki til / Translation missing";
+    }
+
+    const savedScore = userScores[currentIndex];
+    const savedText = userSpoken[currentIndex];
+
+    if (savedScore !== null) {
+        document.getElementById('result').innerText = `Einkunn: ${savedScore}%`;
+        document.getElementById('spoken').innerText = `Þú sagðir: "${savedText}"`;
+    } else {
+        document.getElementById('result').innerText = "";
+        document.getElementById('spoken').innerText = "";
+    }
+}
+
+function nextExercise() { currentIndex++; updateUI(); }
+function prevExercise() { if (currentIndex > 0) { currentIndex--; updateUI(); } }
+
+function toggleRecord() {
+    if (!recognition) return;
+    const btn = document.getElementById('record-btn');
+    if (isRecording) {
+        recognition.stop();
+    } else {
+        try {
+            recognition.start();
+            isRecording = true;
+            btn.innerText = "🛑 Hlusta...";
+            btn.classList.add('recording');
+            document.getElementById('result').innerText = "Hlusta...";
+            document.getElementById('spoken').innerText = "";
+        } catch(e) { console.log("Villa í upptöku: " + e); }
+    }
+}
+
+if (recognition) {
+    recognition.onresult = (event) => {
+        let spoken = event.results[0][0].transcript.trim().toLowerCase(); 
+        document.getElementById('spoken').innerText = `Þú sagðir: "${spoken}"`;
+        
+        const targetWord = exerciseData[currentIndex].text.toLowerCase();
+        let score = 0;
+        if (spoken.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"").trim() === targetWord) {
+            score = 100;
+        }
+        
+        document.getElementById('result').innerText = `Einkunn: ${score}%`;
+        userScores[currentIndex] = score;
+        userSpoken[currentIndex] = spoken;
+        
+        updateProgress();
+
+        if (score === 100) {
+            autoAdvanceTimer = setTimeout(() => { nextExercise(); }, 1000); 
+        }
+    };
+}
+
+function downloadCert() {
+    if (hasDownloadedCert) return; 
+    const studentNameInput = document.getElementById('studentName');
+    const studentName = studentNameInput ? studentNameInput.value.trim() : "";
+    
+    if (studentName === "") { alert("Vinsamlegast skrifaðu nafnið þitt fyrst!"); return; }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 900; canvas.height = 600;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#1a73e8'; ctx.lineWidth = 15; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+    ctx.strokeStyle = '#fbbc05'; ctx.lineWidth = 5; ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+    
+    ctx.fillStyle = '#1a73e8'; ctx.textAlign = 'center'; ctx.font = 'bold 50px Arial';
+    ctx.fillText('Viðurkenning', canvas.width / 2, 140);
+    
+    ctx.fillStyle = '#333333'; ctx.font = '24px Arial';
+    ctx.fillText('Þetta skjal staðfestir að', canvas.width / 2, 220);
+    
+    ctx.fillStyle = '#000000'; ctx.font = 'bold 45px Arial';
+    ctx.fillText(studentName, canvas.width / 2, 290);
+    
+    ctx.fillStyle = '#333333'; ctx.font = '24px Arial';
+    ctx.fillText('hefur lokið æfingunni með glæsibrag:', canvas.width / 2, 360);
+
+    ctx.fillStyle = '#1a73e8'; ctx.font = 'bold 26px Arial';
+    ctx.fillText('Markorð: 211 - 220 algengustu orðin.', canvas.width / 2, 420);
+    
+    ctx.fillStyle = '#34a853'; ctx.font = 'italic 28px Arial';
+    ctx.fillText('Frábær árangur! Haltu áfram að æfa þig.', canvas.width / 2, 490);
+
+    const dateString = new Date().toLocaleDateString('is-IS');
+    ctx.fillStyle = '#666666'; ctx.font = '18px Arial';
+    ctx.fillText('Dagsetning: ' + dateString, canvas.width / 2, 540);
+    
+    const link = document.createElement('a');
+    link.download = `Vidurkenning_${studentName.replace(/\s+/g, '_')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    hasDownloadedCert = true;
+    const btn = document.getElementById('cert-btn');
+    if (btn) {
+        btn.disabled = true; btn.innerText = "✅ Skjal sótt";
+        btn.style.backgroundColor = "#5f6368"; btn.style.cursor = "not-allowed"; btn.style.opacity = "0.7";
+    }
+    if (studentNameInput) studentNameInput.disabled = true;
+}
+</script>
+</body>
+</html>
